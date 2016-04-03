@@ -5,7 +5,7 @@ implicit none
 integer::i
 real::km,fourier
 real,dimension(256)::x,v
-complex,dimension(256)::psi0
+complex,dimension(256)::psi0,psi1,phi,diff
 
 !calculating the values of x and V grid
 open(unit = 10,file = './datafiles/potential.txt')
@@ -26,6 +26,13 @@ do i=1,256
 psi0(i) = ((2*alpha)/pi)**0.25 * exp((-1)*alpha*((x(i)-x0)**2)) * exp(iota*p0*(x(i)-x0))
 write(11,*)x(i),(real(psi0(i))**2 - aimag(psi0(i))**2) !This is for plotting psi square vs x grid
 enddo
+
+! Wavepacket for t = 1
+do i=1,256
+call ft(psi0,diff,x)
+psi1(i) = psi0(i) + iota*dt*(diff(i)/(2*m)-v(i)psi0(i))
+enddo
+
 end program main
 
 function km(L,m,N)
@@ -38,19 +45,6 @@ endif
 return
 end function km
 
-function ft(m,psi,x)
-use constants
-complex::psi,res
-integer::m
-real::x
-!x = x0
-res = 0.0
-do j = 0,m-1
-psi = ((2*alpha)/pi)**0.25 * exp((-1)*alpha*((x-x0)**2)) * exp(iota*p0*(x-x0))
-res = res + sqrt(N) * psi*exp((-1)*iota*km(m)*x)
-x = x + 0.02
-enddo
-res = res * (km(m)**2) * (-1)
-do j = 0,m-1
+subroutine ft(psi0,diff,x)
 
-end function ft
+end subroutine ft
