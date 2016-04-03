@@ -2,10 +2,11 @@ program main
 
 use constants
 implicit none
-integer::i
+integer::i,j,m
 real::km,fourier
 real,dimension(256)::x,v
 complex,dimension(256)::psi0,psi1,phi,diff
+complex::sumwave
 
 !calculating the values of x and V grid
 open(unit = 10,file = './datafiles/potential.txt')
@@ -21,30 +22,56 @@ write(10,*)x(i),v(i)
 enddo
 
 ! Initial gaussian wave packet
-open(unit = 11,file = './datafiles/temp')
+open(unit = 11,file = './datafiles/psi0')
 do i=1,256
 psi0(i) = ((2*alpha)/pi)**0.25 * exp((-1)*alpha*((x(i)-x0)**2)) * exp(iota*p0*(x(i)-x0))
 write(11,*)x(i),(real(psi0(i))**2 - aimag(psi0(i))**2) !This is for plotting psi square vs x grid
 enddo
 
 ! Wavepacket for t = 1
+open(unit = 12,file = './datafiles/psi1')
 do i=1,256
-call ft(psi0,diff,x)
-psi1(i) = psi0(i) + iota*dt*(diff(i)/(2*m)-v(i)psi0(i))
+
+! Start of fourier transform
+do m = 1,256
+sumwave = 0.0
+do j = 1,256
+sumwave = sumwave + psi0(j)*exp((-1)*iota*km(m)*x(j))
 enddo
+sumwave = sumwave/(sqrt(256.0))
+phi(m) = sumwave * (km(m)**2) * (-1)
+enddo
+
+do j = 1,256
+sumwave = 0.0
+do m = 1,256
+sumwave = sumwave + phi(m)*exp(iota*km(m)*x(j))
+enddo
+sumwave = sumwave/(sqrt(256.0))
+diff(j) = sumwave
+enddo
+
+
+psi1(i) = psi0(i) + iota*dt*(diff(i)/(2*mass)-v(i)*psi0(i))
+write(12,*)x(i),(real(psi1(i))**2 - aimag(psi1(i))**2) !This is for plotting psi square vs x grid
+enddo
+
+
 
 end program main
 
-function km(L,m,N)
-real::L,m,N
+!-------------------------------------------------------------End of main----------------------------------------------------
+
+function km(m)
+use constants
+real::L,N,km
+integer::m
+N = 256.0
+L = 256*0.02
 if(m.lt.N/2.0) then 
-km = (2.0*pi*m)/l
+km = (2.0*pi*m)/L
 else if(m.ge.n/2.0) then
 km = (2.0*pi*(m-N))/L
 endif
 return
 end function km
-
-subroutine ft(psi0,diff,x)
-
-end subroutine ft
