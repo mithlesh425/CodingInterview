@@ -7,6 +7,7 @@ real::km,fourier,t
 real,dimension(256)::x,v
 complex,dimension(256)::psi0,psi1,phi,diff,psit,psit1,psit2
 complex::sumwave
+character(20)::filename
 
 !calculating the values of x and V grid
 open(unit = 10,file = './datafiles/potential.txt')
@@ -22,14 +23,14 @@ write(10,*)x(i),v(i)
 enddo
 
 ! Initial gaussian wave packet
-open(unit = 11,file = './datafiles/psi0')
+open(unit = 11,file = './datafiles/psi0.')
 do i=1,256
 psi0(i) = ((2*alpha)/pi)**0.25 * exp((-1)*alpha*((x(i)-x0)**2)) * exp(iota*p0*(x(i)-x0))
 write(11,*)x(i),(real(psi0(i))**2 - aimag(psi0(i))**2) !This is for plotting psi square vs x grid
 enddo
 
 ! Wavepacket for t = 1
-open(unit = 12,file = './datafiles/psi1')
+open(unit = 12,file = './datafiles/psi1.')
 do i=1,256
 
 ! Start of fourier transform
@@ -82,13 +83,23 @@ sumwave = sumwave/(sqrt(256.0))
 diff(j) = sumwave
 enddo
 
+! Creating a file for each 100th step
+write(filename,1)t
+1 format('./datafiles/psi',f4.0)
+if(mod(k,100).eq.0)then
+open(unit = 5,file = filename)
+endif
+
 ! Finding next wave packet
 do i=1,256
 psit2(i) = psit(i) - (2.0*iota*dt)*((-1)*diff(i)/(2*mass) + v(i)*psit1(i))
 if(mod(k,100).eq.0)then
 print*,'Value of t:',t,'Wavefunction:',psit2(i)
+write(5,*)x(i),(real(psit2(i))**2 - aimag(psit2(i))**2) !This is for plotting psi square vs x grid
 endif
 enddo
+
+if(mod(k,100).eq.0) close(5)	! Closing the file
 
 t = t+dt
 psit = psit1
