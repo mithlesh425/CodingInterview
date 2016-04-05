@@ -7,6 +7,5 @@ tdse:${objects}
 	gfortran ${objects} -o tdse
 
 clean:
-	rm *.mod 
 	rm ./datafiles/psi*.*
 	rm ./datafiles/*.txt
