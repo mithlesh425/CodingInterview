@@ -3,7 +3,7 @@ program main
 use constants
 implicit none
 integer::i,j,m,k
-real::km,t
+real::km,t,absolute
 real,dimension(256)::x,v
 complex,dimension(256)::psi0,psi1,phi,diff,psit,psit1,psit2
 complex::sumwave
