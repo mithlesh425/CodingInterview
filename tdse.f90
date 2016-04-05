@@ -3,7 +3,7 @@ program main
 use constants
 implicit none
 integer::i,j,m,k
-real::km,fourier,t
+real::km,t
 real,dimension(256)::x,v
 complex,dimension(256)::psi0,psi1,phi,diff,psit,psit1,psit2
 complex::sumwave
@@ -31,26 +31,13 @@ enddo
 
 ! Wavepacket for t = 1
 open(unit = 12,file = './datafiles/psi1.')
+! Start of fourier transform
+call fourier(psit,phi,x,diff)
 do i=1,256
 
-! Start of fourier transform
-do m = 1,256
-sumwave = 0.0
-do j = 1,256
-sumwave = sumwave + psi0(j)*exp((-1)*iota*km(m)*x(j))
-enddo
-sumwave = sumwave/(sqrt(256.0))
-phi(m) = sumwave * (km(m)**2) * (-1)
-enddo
 
-do j = 1,256
-sumwave = 0.0
-do m = 1,256
-sumwave = sumwave + phi(m)*exp(iota*km(m)*x(j))
-enddo
-sumwave = sumwave/(sqrt(256.0))
-diff(j) = sumwave
-enddo
+psit = psi0
+psi0 = psit
 
 
 psi1(i) = psi0(i) + iota*dt*(diff(i)/(2*mass)-v(i)*psi0(i))
@@ -65,23 +52,7 @@ t = 0.2
 do k = 1,steps
 
 ! Start of fourier transform
-do m = 1,256
-sumwave = 0.0
-do j = 1,256
-sumwave = sumwave + psit(j)*exp((-1)*iota*km(m)*x(j))
-enddo
-sumwave = sumwave/(sqrt(256.0))
-phi(m) = sumwave * (km(m)**2) * (-1)
-enddo
-
-do j = 1,256
-sumwave = 0.0
-do m = 1,256
-sumwave = sumwave + phi(m)*exp(iota*km(m)*x(j))
-enddo
-sumwave = sumwave/(sqrt(256.0))
-diff(j) = sumwave
-enddo
+call fourier(psit,phi,x,diff)
 
 ! Creating a file for each 100th step
 write(filename,1)t
@@ -106,10 +77,13 @@ psit = psit1
 psit1 = psit2
 enddo
 
+
+
 end program main
 
 !-------------------------------------------------------------End of main----------------------------------------------------
 
+! Function to find Km
 function km(m)
 use constants
 real::L,N,km
@@ -123,3 +97,32 @@ km = (2.0*pi*(m-N))/L
 endif
 return
 end function km
+
+! Subroutine for Double differentiation using Fourier Transform
+subroutine fourier(psit,phi,x,diff)
+use constants
+integer::j,m
+real::km,t
+real,dimension(256)::x
+complex,dimension(256)::phi,diff,psit
+complex::sumwave
+
+
+do m = 1,256
+sumwave = 0.0
+do j = 1,256
+sumwave = sumwave + psit(j)*exp((-1)*iota*km(m)*x(j))
+enddo
+sumwave = sumwave/(sqrt(256.0))
+phi(m) = sumwave * (km(m)**2) * (-1)
+enddo
+
+do j = 1,256
+sumwave = 0.0
+do m = 1,256
+sumwave = sumwave + phi(m)*exp(iota*km(m)*x(j))
+enddo
+sumwave = sumwave/(sqrt(256.0))
+diff(j) = sumwave
+enddo
+end subroutine fourier
