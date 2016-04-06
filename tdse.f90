@@ -16,7 +16,7 @@ v(1) = 0.0
 do i = 2,256
 x(i) = x(i-1) + 0.02
 if(x(i).ge.0)then
-v(i) = 1.0
+v(i) = 0.1
 else
 v(i) = 0.0
 endif
@@ -58,7 +58,7 @@ endif
 
 ! Finding next wave packet
 do i=1,256
-psit2(i) = psit(i) + (2.0*iota*dt)*((diff(i)/(2.0*mass)) - (v(i)*psit1(i)))
+psit2(i) = psit(i) - (2.0*iota*dt)*((-1)*diff(i)/(2*mass) + v(i)*psit1(i))
 if(mod(k,100).eq.0)then
 print*,'Value of t:',t,'Wavefunction:',psit2(i)
 write(5,*)x(i),absolute(psit2(i)) !This is for plotting psi square vs x grid
