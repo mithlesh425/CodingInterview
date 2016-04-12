@@ -43,14 +43,16 @@ psit(i) = psit(i)*exp((-1)*iota*dt*v(i)*0.5)
 enddo
 
 ! Start of fourier transform
-diff = psit
+diff = psit !Comment out in case of dft
 !call fourier(psit,phi,x,diff) !This is for dft
-call fft (diff,256,1)	!This will do the forward fourier transform
+! Start fft
+call fft (diff,256,1)	
 do m=1,256
 diff(m) = diff(m) * exp((iota*dt*(km(m)**2) * (-1))/(2*mass))
 enddo
 call fft (diff,256,-1)	!This will do the inverse fourier transform
 diff = diff/real(256)
+! End fft
 
 ! Creating a file for each 100th step
 write(filename,1)t
