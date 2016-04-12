@@ -1,5 +1,5 @@
 ! T‎his is a fortran code for solving time dependent Schrodinger Equation using 
-! split pattern method 
+! split pattern method (Contains methods using fft and dft)
 
 program main
 
@@ -43,7 +43,14 @@ psit(i) = psit(i)*exp((-1)*iota*dt*v(i)*0.5)
 enddo
 
 ! Start of fourier transform
-call fourier(psit,phi,x,diff)
+diff = psit
+!call fourier(psit,phi,x,diff) !This is for dft
+call fft (diff,256,1)	!This will do the forward fourier transform
+do m=1,256
+diff(m) = diff(m) * exp((iota*dt*(km(m)**2) * (-1))/(2*mass))
+enddo
+call fft (diff,256,-1)	!This will do the inverse fourier transform
+diff = diff/real(256)
 
 ! Creating a file for each 100th step
 write(filename,1)t
