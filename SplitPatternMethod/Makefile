@@ -1,7 +1,7 @@
-modules = constants
+modules = constants.f90 fft.f90
 main = tdse
 
-objects = $(modules).f90 $(main).f90
+objects = $(modules) $(main).f90
 
 tdse:${objects}
 	gfortran ${objects} -o tdse
