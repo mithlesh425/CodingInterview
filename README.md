@@ -1,2 +1,2 @@
 # TDSE
-This contains fortran code for solving Time dependent schrodinger Equation for infinite potential barrier.
+This contains fortran code for solving Time dependent schrodinger Equation in various sceneraios using various tehniques.
